@@ -1,0 +1,312 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perissos Diverse Solutions</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .header-bg {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://via.placeholder.com/1920x600'); /* Replace with actual header image */
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .solution-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .solution-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 1s ease forwards;
+        }
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .swiper-slide img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .navbar {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        .nav-links {
+            transition: max-height 0.3s ease-in-out;
+        }
+        @media (max-width: 640px) {
+            .nav-links {
+                max-height: 0;
+                overflow: hidden;
+            }
+            .nav-links.open {
+                max-height: 300px;
+            }
+            .header-bg {
+                height: 60vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar fixed top-0 w-full z-50 py-4 px-4 sm:px-6 flex justify-between items-center">
+        <div class="text-white text-xl sm:text-2xl font-bold">Perissos Diverse Solutions</div>
+        <button id="menu-toggle" class="sm:hidden text-white focus:outline-none">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+            </svg>
+        </button>
+        <div id="nav-links" class="nav-links sm:flex space-y-4 sm:space-y-0 sm:space-x-6 absolute sm:static top-16 left-0 w-full sm:w-auto bg-gray-900 sm:bg-transparent sm:flex-row flex-col sm:items-center px-4 sm:px-0">
+            <a href="#home" class="text-white hover:text-blue-300 transition py-2">Home</a>
+            <a href="#about" class="text-white hover:text-blue-300 transition py-2">About</a>
+            <a href="#solutions" class="text-white hover:text-blue-300 transition py-2">Solutions</a>
+            <a href="#products" class="text-white hover:text-blue-300 transition py-2">Products</a>
+            <a href="#contact" class="text-white hover:text-blue-300 transition py-2">Contact</a>
+        </div>
+    </nav>
+
+    <!-- Header Section -->
+    <header id="home" class="header-bg text-white text-center">
+        <div class="fade-in">
+            <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold mb-4">Success Through Values</h1>
+            <p class="text-xl sm:text-2xl md:text-3xl">Perissos Diverse Solutions</p>
+            <a href="#contact" class="mt-6 inline-block bg-blue-600 text-white py-3 px-6 rounded-full hover:bg-blue-700 transition text-base sm:text-lg">Get Started</a>
+        </div>
+    </header>
+
+    <!-- Who We Are & What We Do Section -->
+    <section id="about" class="py-12 sm:py-20 px-4 sm:px-6 bg-gradient-to-b from-white to-gray-100">
+        <div class="max-w-6xl mx-auto fade-in">
+            <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-center mb-8 sm:mb-12 text-gray-800">WHO WE ARE & WHAT WE DO</h2>
+            <p class="text-base sm:text-lg text-gray-600 mb-6">
+                Perissos Diverse Solutions has been operational in the West African Market for 35 years, excelling in various business verticals. The Perissos Group has operations spread across Africa, the Middle East, the United Kingdom, India, Indonesia, and Singapore. We are a System Integrator with an objective to provide innovative solutions to West African countries, including Nigeria, Ivory Coast, Ghana, and Togo.
+            </p>
+            <p class="text-base sm:text-lg text-gray-600 mb-6">
+                Perissos Diverse Solutions has an in-house and dedicated team for delivering all kinds of audio-visual solutions and services. In a short span of time, we have completed several multifaceted projects on schedule across various territories, driven by our business philosophy of dedication, professionalism, and efficiency. Our focus has been on audio-visual system development and marketing since our establishment, with full competency in resource distribution and control in the value-added chain.
+            </p>
+            <p class="text-base sm:text-lg text-gray-600">
+                To bring more edge to our solutions and to facilitate our customers and partners, we have partnered with world-renowned OEMs. This enables us to deliver the latest technologies to our customers in a cost-effective manner.
+            </p>
+        </div>
+    </section>
+
+    <!-- Our Solutions Section -->
+    <section id="solutions" class="py-12 sm:py-20 px-4 sm:px-6 bg-gray-100">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-center mb-8 sm:mb-12 text-gray-800 fade-in">OUR SOLUTIONS</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+                <!-- Meetings & Presentation -->
+                <div class="solution-card p-6 rounded-lg text-center">
+                    <img src="https://via.placeholder.com/150" alt="Meetings & Presentation" class="mx-auto mb-4 rounded-full w-24 h-24 sm:w-32 sm:h-32 object-cover">
+                    <h3 class="text-lg sm:text-xl font-semibold text-white">MEETINGS & PRESENTATION</h3>
+                    <p class="text-sm sm:text-base text-gray-200">Ease up your meetings with our high-tech solutions.</p>
+                </div>
+                <!-- Unified Communication -->
+                <div class="solution-card p-6 rounded-lg text-center">
+                    <img src="https://via.placeholder.com/150" alt="Unified Communication" class="mx-auto mb-4 rounded-full w-24 h-24 sm:w-32 sm:h-32 object-cover">
+                    <h3 class="text-lg sm:text-xl font-semibold text-white">UNIFIED COMMUNICATION</h3>
+                    <p class="text-sm sm:text-base text-gray-200">Add life to your communications with Perissos innovations.</p>
+                </div>
+                <!-- Digital Entertainment -->
+                <div class="solution-card p-6 rounded-lg text-center">
+                    <img src="https://via.placeholder.com/150" alt="Digital Entertainment" class="mx-auto mb-4 rounded-full w-24 h-24 sm:w-32 sm:h-32 object-cover">
+                    <h3 class="text-lg sm:text-xl font-semibold text-white">DIGITAL ENTERTAINMENT</h3>
+                    <p class="text-sm sm:text-base text-gray-200">Make the right impression with HD audio & video.</p>
+                </div>
+                <!-- Video Collaboration -->
+                <div class="solution-card p-6 rounded-lg text-center">
+                    <img src="https://via.placeholder.com/150" alt="Video Collaboration" class="mx-auto mb-4 rounded-full w-24 h-24 sm:w-32 sm:h-32 object-cover">
+                    <h3 class="text-lg sm:text-xl font-semibold text-white">VIDEO COLLABORATION</h3>
+                    <p class="text-sm sm:text-base text-gray-200">Video conferencing anywhere, anytime with our solutions.</p>
+                </div>
+                <!-- Environmental Control -->
+                <div class="solution-card p-6 rounded-lg text-center">
+                    <img src="https://via.placeholder.com/150" alt="Environmental Control" class="mx-auto mb-4 rounded-full w-24 h-24 sm:w-32 sm:h-32 object-cover">
+                    <h3 class="text-lg sm:text-xl font-semibold text-white">ENVIRONMENTAL CONTROL</h3>
+                    <p class="text-sm sm:text-base text-gray-200">Increase productivity with smart environment solutions.</p>
+                </div>
+                <!-- Energy Management -->
+                <div class="solution-card p-6 rounded-lg text-center">
+                    <img src="https://via.placeholder.com/150" alt="Energy Management" class="mx-auto mb-4 rounded-full w-24 h-24 sm:w-32 sm:h-32 object-cover">
+                    <h3 class="text-lg sm:text-xl font-semibold text-white">ENERGY MANAGEMENT</h3>
+                    <p class="text-sm sm:text-base text-gray-200">Efficiently manage your energy resources with Perissos.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Our Products Section -->
+    <section id="products" class="py-12 sm:py-20 px-4 sm:px-6 bg-white">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-center mb-8 sm:mb-12 text-gray-800 fade-in">OUR PRODUCTS</h2>
+            <div class="swiper-container">
+                <div class="swiper-wrapper">
+                    <!-- Sample Product Slides -->
+                    <div class="swiper-slide">
+                        <img src="https://via.placeholder.com/600x300" alt="Product 1" srcset="https://via.placeholder.com/300x150 300w, https://via.placeholder.com/600x300 600w" sizes="(max-width: 640px) 300px, 600px">
+                        <p class="text-center text-gray-600 mt-4 text-sm sm:text-base">Product 1 Description</p>
+                    </div>
+                    <div class="swiper-slide">
+                        <img src="https://via.placeholder.com/600x300" alt="Product 2" srcset="https://via.placeholder.com/300x150 300w, https://via.placeholder.com/600x300 600w" sizes="(max-width: 640px) 300px, 600px">
+                        <p class="text-center text-gray-600 mt-4 text-sm sm:text-base">Product 2 Description</p>
+                    </div>
+                    <div class="swiper-slide">
+                        <img src="https://via.placeholder.com/600x300" alt="Product 3" srcset="https://via.placeholder.com/300x150 300w, https://via.placeholder.com/600x300 600w" sizes="(max-width: 640px) 300px, 600px">
+                        <p class="text-center text-gray-600 mt-4 text-sm sm:text-base">Product 3 Description</p>
+                    </div>
+                </div>
+                <!-- Add Pagination -->
+                <div class="swiper-pagination mt-4"></div>
+                <!-- Add Navigation -->
+                <div class="swiper-button-next hidden sm:block"></div>
+                <div class="swiper-button-prev hidden sm:block"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Form Section -->
+    <section id="contact" class="py-12 sm:py-20 px-4 sm:px-6 bg-gradient-to-b from-gray-100 to-white">
+        <div class="max-w-6xl mx-auto fade-in">
+            <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-center mb-8 sm:mb-12 text-gray-800">HAVE ANY REQUIREMENT</h2>
+            <p class="text-base sm:text-lg text-center text-gray-600 mb-8">DROP A QUERY BELOW</p>
+            <div class="max-w-lg mx-auto">
+                <div class="space-y-4">
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-700">Your Name (required)</label>
+                        <input type="text" id="name" name="name" required class="mt-1 block w-full p-4 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700">Your Email (required)</label>
+                        <input type="email" id="email" name="email" required class="mt-1 block w-full p-4 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="subject" class="block text-sm font-medium text-gray-700">Subject</label>
+                        <input type="text" id="subject" name="subject" class="mt-1 block w-full p-4 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="message" class="block text-sm font-medium text-gray-700">Your Message</label>
+                        <textarea id="message" name="message" rows="5" class="mt-1 block w-full p-4 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"></textarea>
+                    </div>
+                    <button type="button" onclick="alert('Form submission requires backend integration.')" class="w-full bg-blue-600 text-white p-4 rounded-lg hover:bg-blue-700 transition text-base sm:text-lg">Submit</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer Section -->
+    <footer class="py-8 px-4 bg-gray-900 text-white text-center">
+        <p class="text-sm sm:text-base">&copy; 2025 Perissos Diverse Solutions. All rights reserved.</p>
+    </footer>
+
+    <!-- JavaScript for Mobile Menu and Swiper -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Mobile Menu Toggle
+            const menuToggle = document.getElementById('menu-toggle');
+            const navLinks = document.getElementById('nav-links');
+            menuToggle.addEventListener('click', () => {
+                navLinks.classList.toggle('open');
+            });
+
+            // Swiper Initialization
+            const swiper = new Swiper('.swiper-container', {
+                slidesPerView: 1,
+                spaceBetween: 10,
+                loop: true,
+                pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true,
+                },
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
+                },
+                breakpoints: {
+                    640: {
+                        slidesPerView: 2,
+                        spaceBetween: 20,
+                    },
+                    1024: {
+                        slidesPerView: 3,
+                        spaceBetween: 30,
+                    },
+                },
+            });
+
+            // Fade-in animation on scroll
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('fade-in');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+        });
+    </script>
+</body>
+</html>
