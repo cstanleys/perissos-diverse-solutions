@@ -1,0 +1,12 @@
+{
+  "name": "Perissos Diverse Solutions",
+  "short_name": "Perissos",
+  "description": "IT support, consulting, training and digital solutions.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "theme_color": "#1259a7",
+  "background_color": "#ffffff",
+  "lang": "en"
+}
